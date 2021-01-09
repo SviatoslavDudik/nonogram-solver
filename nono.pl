@@ -56,3 +56,7 @@ transposer([H|T], Cols, Res) :-
 
 ajouter_debut(Liste, H, [H|Liste]).
 
+nonogramme(NLignes, NCols, ContLignes, ContCols, Lignes) :-
+	creer_matrice(NLignes, NCols, Lignes, Cols),
+	maplist(remplir_ligne, Lignes, ContLignes),
+	maplist(remplir_ligne, Cols, ContCols).
