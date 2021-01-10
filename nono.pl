@@ -91,3 +91,18 @@ appliquer_contraintes([(Cont,c,Index)|T], Lignes, Cols) :-
 	nth1(Index, Cols, Col),
 	remplir_ligne(Col, Cont),
 	appliquer_contraintes(T, Lignes, Cols).
+
+afficher_nonogramme([]).
+afficher_nonogramme([Ligne|Reste]) :-
+	afficher_ligne(Ligne),
+	write('\n'),
+	afficher_nonogramme(Reste).
+
+afficher_ligne([]).
+afficher_ligne([b|T]) :-
+	write('.'),
+	afficher_ligne(T).
+afficher_ligne([n|T]) :-
+	write('X'),
+	afficher_ligne(T).
+
