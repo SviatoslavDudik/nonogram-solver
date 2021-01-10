@@ -58,5 +58,36 @@ ajouter_debut(Liste, H, [H|Liste]).
 
 nonogramme(NLignes, NCols, ContLignes, ContCols, Lignes) :-
 	creer_matrice(NLignes, NCols, Lignes, Cols),
-	maplist(remplir_ligne, Lignes, ContLignes),
-	maplist(remplir_ligne, Cols, ContCols).
+	former_liste_contraintes(ContLignes, ContCols, Contraintes),
+	appliquer_contraintes(Contraintes, Lignes, Cols).
+
+former_liste_contraintes(ContLignes, ContCols, Contraintes) :-
+	ajouter_contraintes([], ContLignes, 1,  l, Contraintes1),
+	ajouter_contraintes(Contraintes1, ContCols, 1, c, Contraintes2),
+	sort(2, @>=, Contraintes2, Contraintes3),
+	select_first(Contraintes3, Contraintes).
+
+ajouter_contraintes(Cont, [], _, _, Cont).
+ajouter_contraintes(Contraintes, [H|T], Index, Label, [((H,Label,Index),Heuristic)|Res]) :-
+	NewIndex is Index + 1,
+	ajouter_contraintes(Contraintes, T, NewIndex, Label, Res),
+	h(H, Heuristic).
+
+h([], 0).
+h([H|T], Valeur) :-
+	h(T, V),
+	Valeur is V + H + 1.
+
+select_first([], []).
+select_first([(X,_)|T], [X|Res]) :-
+	select_first(T, Res).
+
+appliquer_contraintes([], _, _).
+appliquer_contraintes([(Cont,l,Index)|T], Lignes, Cols) :-
+	nth1(Index, Lignes, Ligne),
+	remplir_ligne(Ligne, Cont),
+	appliquer_contraintes(T, Lignes, Cols).
+appliquer_contraintes([(Cont,c,Index)|T], Lignes, Cols) :-
+	nth1(Index, Cols, Col),
+	remplir_ligne(Col, Cont),
+	appliquer_contraintes(T, Lignes, Cols).
