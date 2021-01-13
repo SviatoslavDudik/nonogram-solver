@@ -166,15 +166,42 @@ ajouter_contraintes(Contraintes, [H|T], Index, Label, [((H,Label,Index),Heuristi
 	ajouter_contraintes(Contraintes, T, NewIndex, Label, Res),
 	h(H, Heuristic).
 
+/* h(+Cont, ?Valeur)
+ * Vrai si Valeur est la valeur heuristique de la contrainte Cont.
+ * L'heuristique consiste à compter le remplissage de la ligne/colonne par la
+ * contrainte. Une contrainte avec une plus grande valeur heuristique instancie
+ * plus de cases, et donc, est meilleure.
+ *
+ * Exemple :
+ * ?- h([1,2],V).
+ * V = 5. */
 h([], 0).
 h([H|T], Valeur) :-
 	h(T, V),
 	Valeur is V + H + 1.
 
+/* select_first(+Liste, ?Res).
+ * Crée la liste Res et y ajoute le premier élément de chaque couple de la
+ * liste Liste.
+ * ?- select_first([(1,2),(3,4)],R).
+ * R = [1, 3]. */
 select_first([], []).
 select_first([(X,_)|T], [X|Res]) :-
 	select_first(T, Res).
 
+/* appliquer_contraintes(+Contraintes, +Lignes, +Cols)
+ * Instancie la matrice représentée en même temps par Lignes et Cols selon les
+ * contraintes Contraintes.
+ *
+ * Contraintes est une liste où chaque élément est un triplet (Cont,l/c,Index)
+ * où Cont est une contrainte, l veut dire que elle concerne une ligne et c pour
+ * une colonne, Index est l'indice de la ligne/colonne en commençant à 1.
+ *
+ * Exemple :
+ * ?- creer_matrice(2,2,L,C), appliquer_contraintes([([2],l,1),([1],c,2)],L,C).
+ * L = [[n, n], [_5040, b]],
+ * C = [[n, _5040], [n, b]] ;
+ * false. */
 appliquer_contraintes([], _, _).
 appliquer_contraintes([(Cont,l,Index)|T], Lignes, Cols) :-
 	nth1(Index, Lignes, Ligne),
