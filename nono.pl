@@ -114,7 +114,7 @@ ajouter_debut(Liste, H, [H|Liste]).
  * false. */
 nonogramme(NLignes, NCols, ContLignes, ContCols, Lignes) :-
 	creer_matrice(NLignes, NCols, Lignes, Cols),
-	former_liste_contraintes(ContLignes, ContCols, Contraintes),
+	former_liste_contraintes(ContLignes, ContCols, NLignes, NCols, Contraintes),
 	appliquer_contraintes(Contraintes, Lignes, Cols).
 
 /* former_liste_contraintes(+ContLignes, +ContCols, -Contraintes)
@@ -134,15 +134,16 @@ nonogramme(NLignes, NCols, ContLignes, ContCols, Lignes) :-
  * ?- former_liste_contraintes([[1,1],[2],[3],[1]],[[1,1],[3],[2],[1]],Cont).
  * Cont = [([1, 1], c, 1),  ([3], c, 2),  ([1, 1], l, 1),  ([3], l, 3),  ([2], c, 3),  ([2], l, 2),  ([1], c, 4),  ([1], l, 4)] ;
  * false. */
-former_liste_contraintes(ContLignes, ContCols, Contraintes) :-
-	ajouter_contraintes([], ContLignes, 1,  l, Contraintes1),
-	ajouter_contraintes(Contraintes1, ContCols, 1, c, Contraintes2),
-	sort(2, @>=, Contraintes2, Contraintes3),
+former_liste_contraintes(ContLignes, ContCols, NLignes, NCols, Contraintes) :-
+	ajouter_contraintes([], ContLignes, NCols, 1,  l, Contraintes1),
+	ajouter_contraintes(Contraintes1, ContCols, NLignes, 1, c, Contraintes2),
+	sort(2, @=<, Contraintes2, Contraintes3),
 	select_first(Contraintes3, Contraintes).
 
-/* ajouter_contraintes(+Contraintes, +NewContraintes, +BaseIndex, +Label, -Resultat)
+/* ajouter_contraintes(+Contraintes, +NewContraintes, +Longueur, +BaseIndex, +Label, -Resultat)
  * Ajoute les contraintes NewContraintes à la liste Contraintes.
  *
+ * Longueur est la longueur d'une ligne/colonne.
  * BaseIndex est l'indice de la première contrainte (généralement 0 ou 1) pour
  * pouvoir numéroter correctement.
  * Label sera inclus avec chaque nouvelle contrainte et est destiné à distinguer
@@ -160,11 +161,17 @@ former_liste_contraintes(ContLignes, ContCols, Contraintes) :-
  * ?- ajouter_contraintes([1,2],[[1,1],[2],[3],[1]],1,l,Cont).
  * Cont = [(([1, 1], l, 1), 4),  (([2], l, 2), 3),  (([3], l, 3), 4),  (([1], l, 4), 2), 1, 2] ;
  * false. */
-ajouter_contraintes(Cont, [], _, _, Cont).
-ajouter_contraintes(Contraintes, [H|T], Index, Label, [((H,Label,Index),Heuristic)|Res]) :-
+ajouter_contraintes(Cont, [], _, _, _, Cont).
+ajouter_contraintes(Contraintes, [H|T], Longueur, Index, Label, [((H,Label,Index),Heuristic)|Res]) :-
 	NewIndex is Index + 1,
-	ajouter_contraintes(Contraintes, T, NewIndex, Label, Res),
-	h(H, Heuristic).
+	ajouter_contraintes(Contraintes, T, Longueur, NewIndex, Label, Res),
+	h(H, Longueur, Heuristic).
+
+/*nb_cases_vides(Cont,Length,Acc,R).*/
+nb_cases_vides([], Longueur, Acc, R) :- R is Longueur-Acc.
+nb_cases_vides([H|T], Longueur, Acc, R) :-
+	NewAcc is Acc+H,
+	nb_cases_vides(T, Longueur, NewAcc, R).
 
 /* h(+Cont, ?Valeur)
  * Vrai si Valeur est la valeur heuristique de la contrainte Cont.
@@ -174,11 +181,13 @@ ajouter_contraintes(Contraintes, [H|T], Index, Label, [((H,Label,Index),Heuristi
  *
  * Exemple :
  * ?- h([1,2],V).
- * V = 5. */
-h([], 0).
-h([H|T], Valeur) :-
-	h(T, V),
-	Valeur is V + H + 1.
+ * V = 3. */
+h(Cont, Longueur, Valeur) :-
+	nb_cases_vides(Cont, Longueur, 0, Nb),
+	length(Cont,NCont),
+	(NCont == 1 ->
+		Valeur is Nb+1;
+		Valeur is Nb*(Nb+1)/2).
 
 /* select_first(+Liste, ?Res).
  * Crée la liste Res et y ajoute le premier élément de chaque couple de la
