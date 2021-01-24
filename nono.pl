@@ -1,6 +1,7 @@
 /* remplir_ligne(+Ligne, +Contraintes)
- * Remplit la liste Liste avec n ou b (noir or blanc) en respectant les
- * contraintes Contraintes. La liste Ligne doit être créée auparavant.
+ * Vrai si la liste Ligne vérifie les contraintes Contraintes.
+ * Chaque élément de Ligne est soit la constante n  (noir), soit la constante b
+ * (blanc), soit non instacié. La liste Ligne doit être créée auparavant.
  * La liste de contraintes est une liste contenant les nombres de cases noires
  * contigües.
  *
@@ -167,27 +168,20 @@ ajouter_contraintes(Contraintes, [H|T], Longueur, Index, Label, [((H,Label,Index
 	ajouter_contraintes(Contraintes, T, Longueur, NewIndex, Label, Res),
 	h(H, Longueur, Heuristic).
 
-/*nb_cases_vides(Cont,Length,Acc,R).*/
-nb_cases_vides([], Longueur, Acc, R) :- R is Longueur-Acc.
-nb_cases_vides([H|T], Longueur, Acc, R) :-
-	NewAcc is Acc+H,
-	nb_cases_vides(T, Longueur, NewAcc, R).
-
-/* h(+Cont, ?Valeur)
+/* h(+Cont, +Longueur, ?Valeur)
  * Vrai si Valeur est la valeur heuristique de la contrainte Cont.
- * L'heuristique consiste à compter le remplissage de la ligne/colonne par la
- * contrainte. Une contrainte avec une plus grande valeur heuristique instancie
- * plus de cases, et donc, est meilleure.
+ * Longeur est la longueur de la ligne ou de la colonne.
+ * L'heuristique consiste à compter le nombre de sous-arbres qui peuvent être
+ * générés par la contrainte.
+ * Une contrainte qui crée moins de sous-arbres est meilleure.
  *
  * Exemple :
- * ?- h([1,2],V).
+ * ?- h([1,2],5,V).
  * V = 3. */
 h(Cont, Longueur, Valeur) :-
-	nb_cases_vides(Cont, Longueur, 0, Nb),
-	length(Cont,NCont),
-	(NCont == 1 ->
-		Valeur is Nb+1;
-		Valeur is Nb*(Nb+1)/2).
+	length(Ligne, Longueur),
+	findall(1, remplir_ligne(Ligne, Cont), A),
+	length(A, Valeur).
 
 /* select_first(+Liste, ?Res).
  * Crée la liste Res et y ajoute le premier élément de chaque couple de la
