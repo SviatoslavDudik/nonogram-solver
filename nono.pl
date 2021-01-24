@@ -171,9 +171,10 @@ ajouter_contraintes(Contraintes, [H|T], Longueur, Index, Label, [((H,Label,Index
 /* h(+Cont, +Longueur, ?Valeur)
  * Vrai si Valeur est la valeur heuristique de la contrainte Cont.
  * Longeur est la longueur de la ligne ou de la colonne.
- * L'heuristique consiste à compter le nombre de sous-arbres qui peuvent être
- * générés par la contrainte.
- * Une contrainte qui crée moins de sous-arbres est meilleure.
+ * L'heuristique consiste à compter le nombre d'instances qui peuvent être
+ * générées par la contrainte.
+ * Une contrainte qui crée moins d'instances est meilleure et peut être
+ * appliqué plus tôt.
  *
  * Exemple :
  * ?- h([1,2],5,V).
