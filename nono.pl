@@ -1,3 +1,32 @@
+% Auteur: DUDIK Sviatoslav 11708496
+
+% Pour résoudre et afficher le résultat:
+% nonogramme(10,7,[[5],[1,1,1],[5],[1],[5],[1,1,2],[1],[5],[1,1],[2,2]],[[1],[3,2,3],[1,1,1,1],[8],[1,1,1,1],[3,2,3],[1,1]],G),
+% afficher_nonogramme(G).
+
+/* nonogramme(+NLignes, +NCols, +ContLignes, +ContCols, -Lignes)
+ * Remplit le nonogramme constitué de NLignes lignes et NCols colonnes ayant les
+ * contraintes sur les lignes ContLignes et sur les colonnes ContCols.
+ *
+ * ContLignes (resp. ContCols) est une liste qui contient NLignes (resp. NCols)
+ * listes. Chacune de ces dernières décrit les contraintes sur une ligne (resp.
+ * une colonne) du nonogramme. Par exemple ContLignes = [[2,1]|_] veut dire que
+ * la première ligne comporte 2 cases noires contigües suivis d'au moins une case
+ * blanche et ensuite une case noire, toutes les autres cases sont blanches.
+ *
+ * Le remplissage avec n (noir, rempli) et b (blanc, non rempli) se trouve dans
+ * Lignes à la fin de l'exécution. Lignes est une liste de lignes, donc chaque
+ * élément de cette liste représente une ligne du dessin.
+ *
+ * Exemple :
+ * ?- nonogramme(4,4,[[1,1],[2],[3],[1]],[[1,1],[3],[2],[1]],G).
+ * G = [[n, b, b, n], [b, n, n, b], [n, n, n, b], [b, n, b, b]] ;
+ * false. */
+nonogramme(NLignes, NCols, ContLignes, ContCols, Lignes) :-
+	creer_matrice(NLignes, NCols, Lignes, Cols),
+	former_liste_contraintes(ContLignes, ContCols, NLignes, NCols, Contraintes),
+	appliquer_contraintes(Contraintes, Lignes, Cols).
+
 /* remplir_ligne(+Ligne, +Contraintes)
  * Vrai si la liste Ligne vérifie les contraintes Contraintes.
  * Chaque élément de Ligne est soit la constante n  (noir), soit la constante b
@@ -94,29 +123,6 @@ transposer([H|T], Cols, Res) :-
 	maplist(ajouter_debut, Cols1, H, Res).
 
 ajouter_debut(Liste, H, [H|Liste]).
-
-/* nonogramme(+NLignes, +NCols, +ContLignes, +ContCols, -Lignes)
- * Remplit le nonogramme constitué de NLignes lignes et NCols colonnes ayant les
- * contraintes sur les lignes ContLignes et sur les colonnes ContCols.
- *
- * ContLignes (resp. ContCols) est une liste qui contient NLignes (resp. NCols)
- * listes. Chacune de ces dernières décrit les contraintes sur une ligne (resp.
- * une colonne) du nonogramme. Par exemple ContLignes = [[2,1]|_] veut dire que
- * la première ligne comporte 2 cases noires contigües suivis d'au moins une case
- * blanche et ensuite une case noire, toutes les autres cases sont blanches.
- *
- * Le remplissage avec n (noir, rempli) et b (blanc, non rempli) se trouve dans
- * Lignes à la fin de l'exécution. Lignes est une liste de lignes, donc chaque
- * élément de cette liste représente une ligne du dessin.
- *
- * Exemple :
- * ?- nonogramme(4,4,[[1,1],[2],[3],[1]],[[1,1],[3],[2],[1]],G).
- * G = [[n, b, b, n], [b, n, n, b], [n, n, n, b], [b, n, b, b]] ;
- * false. */
-nonogramme(NLignes, NCols, ContLignes, ContCols, Lignes) :-
-	creer_matrice(NLignes, NCols, Lignes, Cols),
-	former_liste_contraintes(ContLignes, ContCols, NLignes, NCols, Contraintes),
-	appliquer_contraintes(Contraintes, Lignes, Cols).
 
 /* former_liste_contraintes(+ContLignes, +ContCols, -Contraintes)
  * Crée la liste des contraintes en fusionnant les listes ContLignes et ContCols
